@@ -17,7 +17,7 @@ import numpy as np
 def print_lorenzo(_data, Np, same_patch, delta, box, fname):
 
     f = open(fname, 'w')
-    print type(box)
+
     if type(box) is float:
         f.write(".Box: %.5f , %.5f , %.5f\n" % (box,box,box))
     else:

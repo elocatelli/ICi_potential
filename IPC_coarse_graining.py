@@ -15,10 +15,8 @@ def overlap_volume(d, R1, R2):
         if d > rmin and d <= rmax:
                 out = (np.pi/3.)*( 2*R1 + (R1**2 - R2**2 + d**2)/(2*d))*( R1 - (R1**2 - R2**2 + d**2)/(2*d))**2
                 out += (np.pi/3.)*( 2*R2 - (R1**2 - R2**2 - d**2)/(2*d))*( R2 + (R1**2 - R2**2 - d**2)/(2*d))**2
-  ##      if d > rmax:
-  ##          print "overlap_vol", d, rmax, out
 
-        Vref = (4.*np.pi/3.)*0.5**3
+        Vref = 1. #(4.*np.pi/3.)*0.5**3
 
         return out/Vref
 
@@ -26,38 +24,30 @@ def compute_dum_energy(_part1, _part2, Rc, Rp):
 
         Np1 = _part1.shape[0]
         Np2 = _part2.shape[0]
-        out = 0
+        out = np.zeros(3)  ###only in the case EE PP EP are sufficient
         R10 = 0; R20 = 0
+        k = -1
 
         for ll in range(Np1):
-                for nn in range(Np2):
+            for nn in range(Np2):
 
-                        if ll == 0 and nn == 0:
-                                #EE = energy[0]
-                                R10 = Rc; R20 = Rc
-                        elif ll == 0 and nn > 0:
-                                R10 = Rc; R20 = Rp[nn-1]
-                        elif nn == 0 and ll > 0:
-                                R10 = Rp[ll-1]; R20 = Rc
-                        else:
-                                #EE = energy[2]
-                                R10 = Rp[ll-1]; R20 = Rp[nn-1]
+                if ll == 0 and nn == 0:
+                    R10 = Rc; R20 = Rc; k = 0
+                elif ll == 0 and nn > 0:
+                    R10 = Rc; R20 = Rp[nn-1]; k = 2
+                elif nn == 0 and ll > 0:
+                    R10 = Rp[ll-1]; R20 = Rc; k = 2
+                else:
+                    R10 = Rp[ll-1]; R20 = Rp[nn-1]; k = 1
 
-                        d = np.linalg.norm(_part1[ll,:] - _part2[nn,:]);
+                d = np.linalg.norm(_part1[ll,:] - _part2[nn,:]);
                     
-                        #if rr > 1.2 and (d - (R10+R20))< 0:
-                        #    print ll, nn, d, R10, R20, d - (R10+R20)
-                        #    for k in range(3): print _part1[k,:], _part2[k,:]
-                        #    print "###########"
+                ##if ll == 0 and nn == 0 and d < 1.:
+                ###    print "something is wrong cores are too close"; exit(1) 
+                vol = overlap_volume(d, R10, R20)
+                out[k] += vol             
 
-                        if ll == 0 and nn == 0 and d < 1.:
-                            print "something is wrong cores are too close"; exit(1) 
-                        else:
-                            vol = overlap_volume(d, R10, R20)
-            
-                        out += vol
-
-        return out;
+        return out
 
 def move_part(_part, _mov):
     _mov = np.asarray(_mov)
@@ -100,7 +90,7 @@ class Mixin:
 
         ##MAX cg: match the potential at contact
         MAX_eff_pot = self.effective_potential[np.where(self.effective_potential[:,0] == self.sigma)]
-        MAX_eff_pot = MAX_eff_pot.ravel()
+        MAX_eff_pot = MAX_eff_pot[0,1:].ravel()
 
         _part1_0 = self.generate_particle(0.)
         _part2_0 = np.copy(_part1_0) ##generate_particle(Npatch, box, sigma_core, sigma_patch, ecc, patch_vec)
@@ -109,49 +99,69 @@ class Mixin:
 
         ##EE
         _part1 = np.copy(_part1_0)
+        _part2 = move_part(_part1, [self.sigma,0,0])
+        EE = compute_dum_energy(_part1, _part2, sigma_core2, self.sigma_patch)
+
+        ##PP
+        _part1 = rotate_part(_part1_0, [0,1,0], np.pi/2.)
+        _part2_1 = rotate_part(_part2_0, [0,1,0], -np.pi/2.)
+        _part2 = move_part(_part2_1, [self.sigma,0,0])
+        PP = compute_dum_energy(_part1, _part2, sigma_core2, self.sigma_patch)
+
+        #EP
+        _part1 = np.copy(_part1_0)
+        _part2_1 = rotate_part(_part2_0, [0,1,0], -np.pi/2.)
+        _part2 = move_part(_part2_1, [self.sigma,0,0])
+        EP = compute_dum_energy(_part1, _part2, sigma_core2, self.sigma_patch)
+
+        _mat = [EE,PP,EP]; _mat = np.reshape(np.asarray(_mat),(3,3))
+
+        print _mat
+        print MAX_eff_pot
+        u_cg = np.linalg.solve(_mat, MAX_eff_pot)
+        print u_cg
+
+        ##EE
+        _part1 = np.copy(_part1_0)
         VEE = []
 
         for r in np.linspace(self.sigma, 1.5*self.sigma, 100):
             _part2 = move_part(_part1, [r,0,0])
             EE = compute_dum_energy(_part1, _part2, sigma_core2, self.sigma_patch)
-            VEE.extend([r,EE])
+            VEE.extend([r,np.dot(np.asarray(EE),u_cg)])
 
         VEE = np.reshape(np.asarray(VEE),(len(VEE)/2,2))
-        _EE_fact = MAX_eff_pot[1]/VEE[0,1]
     
         ##PP
+        VPP = []
         _part1 = rotate_part(_part1_0, [0,1,0], np.pi/2.)
         _part2_1 = rotate_part(_part2_0, [0,1,0], -np.pi/2.)
-        VPP = []
 
         for r in np.linspace(self.sigma, 1.5*self.sigma, 100):
             _part2 = move_part(_part2_1, [r,0,0])
             PP = compute_dum_energy(_part1, _part2, sigma_core2, self.sigma_patch)
-            VPP.extend([r,PP])
+            VPP.extend([r,np.dot(np.asarray(PP),u_cg)])
 
         VPP = np.reshape(np.asarray(VPP),(len(VPP)/2,2))
-        _PP_fact = MAX_eff_pot[2]/VPP[0,1]
 
         #EP
+        VEP = []
         _part1 = np.copy(_part1_0)
         _part2_1 = rotate_part(_part2_0, [0,1,0], -np.pi/2.)
-        VEP = []
-    
+
         for r in np.linspace(self.sigma, 1.5*self.sigma, 100):
             _part2 = move_part(_part2_1, [r,0,0])
             EP = compute_dum_energy(_part1, _part2, sigma_core2, self.sigma_patch)
-            VEP.extend([r,EP])
+            VEP.extend([r,np.dot(np.asarray(EP),u_cg)])
 
         VEP = np.reshape(np.asarray(VEP),(len(VEP)/2,2))
-        _EP_fact = MAX_eff_pot[3]/VEP[0,1]    
 
         ##print
         self.cg_potential = np.empty((VPP.shape[0],4),dtype = float)
 
-        self.cg_potential[:,0] = VEE[:,0]; self.cg_potential[:,1] = _EE_fact*VEE[:,1] 
-        self.cg_potential[:,2] = _PP_fact*VPP[:,1]; self.cg_potential[:,3] = _EP_fact*VEP[:,1]
-        
+        self.cg_potential[:,0] = VEE[:,0]; self.cg_potential[:,1] = VEE[:,1] 
+        self.cg_potential[:,2] = VPP[:,1]; self.cg_potential[:,3] = VEP[:,1]
 
-        return [_EE_fact, _PP_fact, _EP_fact]
+        return u_cg
 
 

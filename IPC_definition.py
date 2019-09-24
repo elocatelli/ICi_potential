@@ -37,7 +37,7 @@ class IPC(IPC_DH_potentials.Mixin, IPC_effective_potentials.Mixin, IPC_coarse_gr
         self.topofile = 'dum'
         self.topo = []                      ##unit vectors defining the position of the charges/patches
 
-        self.lmax = 80
+        self.lmax = 20
 
         self.is_wall = False	            ##is there a wall? 
                
@@ -158,7 +158,7 @@ class IPC(IPC_DH_potentials.Mixin, IPC_effective_potentials.Mixin, IPC_coarse_gr
         if len(plist2) == 3:
 
             if 'sigma_patch' in plist2 and 'debye_constant' in plist2 and 'screening_constant' in plist2 :
-                self.kappa = self.emme/self.sigma
+                self.kappa = self.emme/self.sigma_core
                 self.delta = self.enne/self.kappa
                 self.ecc = self.delta/2. + self.sigma_core - self.sigma_patch
                 self.cosgamma = (self.sigma_core**2 + self.ecc**2 - self.sigma_patch**2)/(2.*self.sigma_core*self.ecc)
@@ -171,14 +171,14 @@ class IPC(IPC_DH_potentials.Mixin, IPC_effective_potentials.Mixin, IPC_coarse_gr
                 print "not supported"; exit(1)
 
             elif 'sigma_patch' in plist2 and 'screening_constant' in plist2 and 'delta' in plist2 :
-                self.kappa = self.emme/self.sigma
+                self.kappa = self.emme/self.sigma_core
                 self.enne = self.delta/self.kappa
                 self.ecc = self.delta/2. + self.sigma_core - self.sigma_patch
                 self.cosgamma = (self.sigma_core**2 + self.ecc**2 - self.sigma_patch**2)/(2.*self.sigma_core*self.ecc)
                 self.gamma = np.arccos(self.cosgamma)
 
             elif 'sigma_patch' in plist2 and 'screening_constant' in plist2 and 'eccentricity' in plist2 :
-                self.kappa = self.emme/self.sigma
+                self.kappa = self.emme/self.sigma_core
                 self.delta = 2*(self.ecc - self.sigma_core + self.sigma_patch) 
                 self.enne = self.delta*self.kappa
                 self.cosgamma = (self.sigma_core**2 + self.ecc**2 - self.sigma_patch**2)/(2.*self.sigma_core*self.ecc)
@@ -186,11 +186,11 @@ class IPC(IPC_DH_potentials.Mixin, IPC_effective_potentials.Mixin, IPC_coarse_gr
 
             elif 'eccentricity' in plist2 and 'screening_constant' in plist2 and 'debye_constant' in plist2:
                 print "should be here", self.ecc, self.emme, self.enne
-                self.kappa = self.emme/self.sigma
+                self.kappa = self.emme/self.sigma_core
                 self.delta = self.enne/self.kappa
-                self.sigma_patch = self.delta/2. + self.sigma_core - self.ecc; print self.delta, self.sigma_patch
+                self.sigma_patch = self.delta/2. + self.sigma_core - self.ecc; 
                 self.cosgamma = (self.sigma_core**2 + self.ecc**2 - self.sigma_patch**2)/(2.*self.sigma_core*self.ecc)
-                self.gamma = np.arccos(self.cosgamma); print self.gamma
+                self.gamma = np.arccos(self.cosgamma)
 
             else:
                 print "not supported"; exit(1)
@@ -218,9 +218,12 @@ class IPC(IPC_DH_potentials.Mixin, IPC_effective_potentials.Mixin, IPC_coarse_gr
             if self.npatch == 2:
                 print "using the default for %d patches: polar patches" % self.npatch
                 self.topo = [[0., 0., 1], [0., 0., -1.]]
-            if self.npatch == 3:
+            elif self.npatch == 3:
                 print "using the default for %d patches: triangle patches" % self.npatch
                 self.topo = [[0., 0., 1], [0.86602, 0., -0.5], [-0.86602, 0., -0.5]]
+	    else:
+		print "no default topology for more than 3 patches"
+		exit(1)                
         else:
             f = open(self.topofile, 'r')
         
