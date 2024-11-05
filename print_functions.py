@@ -1,6 +1,12 @@
 import numpy as np
 
-import matplotlib.pyplot as plt
+_plt = False
+try:
+    _mod = 'matplotlib'; import matplotlib.pyplot as plt
+    _plt = True
+except Exception as e:
+    print(e); _plt = False
+    print("module ", _mod," not found; not using")
 
 #def gen_colormap():
 #
@@ -61,7 +67,34 @@ def print_lorenzo(_data, Np, same_patch, delta, box, fname):
 
     f.close()
 
-#def print_lammpstrj(_data, Np, same_patch, delta, box, fname):
+def print_lammpstrj(myinput, thisL, myname):
+
+    f = open(myname, "w")
+    howmany = myinput.shape[0]
+
+    if len(thisL) == 0:
+        xbox = thisL
+        ybox = thisL
+        zbox = thisL
+    else:
+        xbox = thisL[0]
+        ybox = thisL[1]
+        zbox = thisL[2]
+
+    f.write("ITEM: TIMESTEP\n%ld\n" % 0)
+    f.write("ITEM: NUMBER OF ATOMS\n%ld\n" % howmany)
+    f.write(
+        "ITEM: BOX BOUNDS pp pp pp\n%.0f %.1f\n%.0f %.1f\n%.0f %.1f\n"
+        % (0.0, xbox, 0.0, ybox, 0.0, zbox)
+    )
+    f.write("ITEM: ATOMS id type x y z\n")
+    for i in range(howmany):
+        f.write(
+            "%d %d %.5f %.5f %.5f 0 0 0\n"
+            % (i + 1, myinput[i, 0], myinput[i, 1], myinput[i, 2], myinput[i, 3])
+        )
+
+    f.close()
 
 
 def print_lammps_init(_particle, box, outfile):

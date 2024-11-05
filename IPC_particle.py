@@ -26,9 +26,9 @@ class Mixin:
 
     def check_doubleint_2P(self):
         
-        my_th = np.arccos(np.dot(self.topo[0], self.topo[1]))
-        if (np.pi-my_th) < 1E-2:
-            print("patches are polar:angle between patches: ", my_th*180/np.pi)
+        my_th = np.dot(self.topo[0], self.topo[1])
+        if (-1-my_th) < 1E-2:
+            print("patches are polar:angle between patches: ", np.arccos(my_th)*180/np.pi)
             self.default_topo = True
             return
 
@@ -38,13 +38,14 @@ class Mixin:
             th = 2.*np.pi-th
 
         if my_th < th:
-            f = open("RES/effective_potential_general.dat", "w")
+            f = open(self.IPCdict['folder']+"/effective_potential_general.dat", "w")
             f.write("an angle of %.5f is forbidden! minimum angle to have two patches is %.5f\n" % (my_th*180/np.pi, th*180/np.pi))
             f.close()
             print(my_th, "forbidden! minimum angle to have two patches is", th*180./np.pi); exit(1)
 
         th = 2.*np.arccos((0.5-self.patch_sigma)/(self.ecc))
         if my_th < np.amax(th):
+            print("double interaction!")
             self.doubleint = True
 
 
@@ -69,11 +70,11 @@ class Mixin:
             
         else:
             f = open(self.IPCdict['topofile'], 'r')
-
+            print("Using topology from file ", self.IPCdict['topofile'])
             for lines in f:
                 lines = lines.strip("\n");
                 self.topo.append([float(x) for x in (lines.strip(" ").split(','))])
-
+            print("Topology: ", self.topo)
             f.close()
 
             for el in self.topo:

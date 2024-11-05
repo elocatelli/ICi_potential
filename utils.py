@@ -35,7 +35,7 @@ def safecopy(_copyfrom, _copyto):
             exit(1)
 
 def myconvert(_dict_name, content):
-
+        
     if type(_dict_name) is int:
         try:
             _dict_name = int(content)
@@ -124,6 +124,56 @@ def rotation_matrix(input_vec, input_ref):
 
     return v1, v2, out
 
+def random_on_sphere():
+
+    ransq = 100
+
+    while ransq >= 1.0:
+        ran_1 = 1.0 - 2.0 * np.random.rand()
+        ran_2 = 1.0 - 2.0 * np.random.rand()
+        ransq = np.power(ran_1, 2) + np.power(ran_2, 2)
+
+    ranh = 2.0 * np.sqrt(1.0 - ransq)
+
+    res = np.empty((3), dtype=float)
+
+    res[0] = ran_1 * ranh
+    res[1] = ran_2 * ranh
+    res[2] = 1.0 - 2.0 * ransq
+
+    return res
+
+def rotation_random(rand_angle):
+
+    vect = random_on_sphere()
+
+    t = rand_angle
+    sintheta = np.sin(t)
+    costheta = np.cos(t)
+    olcos = 1.0 - costheta
+
+    xyo = vect[0] * vect[1] * olcos
+    xzo = vect[0] * vect[2] * olcos
+    yzo = vect[1] * vect[2] * olcos
+    xsin = vect[0] * sintheta
+    ysin = vect[1] * sintheta
+    zsin = vect[2] * sintheta
+
+    out = np.empty((3, 3), dtype=float)
+
+    out[0, 0] = vect[0] * vect[0] * olcos + costheta
+    out[0, 1] = xyo - zsin
+    out[0, 2] = xzo + ysin
+    out[1, 0] = xyo + zsin
+    out[1, 1] = vect[1] * vect[1] * olcos + costheta
+    out[1, 2] = yzo - xsin
+    out[2, 0] = xzo - ysin
+    out[2, 1] = yzo + xsin
+    out[2, 2] = vect[2] * vect[2] * olcos + costheta
+
+    return out
+
+
 def check_patches(_input, npatches, ecc):
 
     for i in range(1,npatches+1):
@@ -136,11 +186,27 @@ def move_part(_part, _mov):
     _mov = np.asarray(_mov)
     return _part[:] + _mov
 
-def rotate_part(_part, _axis, angle):
+def rotate_patches(_part, _axis, angle):
     _mat = axis_angle_rotation(_axis, angle)
     _out = np.empty_like(_part);
 
-    for i in range(_part.shape[0]):
+    _out[0] = _part[0]
+    for i in range(1,_part.shape[0]):
         _out[i,:3] = np.dot(_mat,_part[i,:3])
 
     return _out
+
+def rotate_part(_part, _axis, angle):
+    ##particle was already moved, rotate only the colloid
+    _mat = axis_angle_rotation(_axis, angle)
+    _out = np.empty_like(_part);
+
+    temp = np.copy(_part); temp -= temp[0]
+    _out[0,:3] = np.dot(_mat,_part[0,:3])
+    for i in range(1, _part.shape[0]):
+        _out[i,:3] = _out[0,:3] + temp[i,:3]
+
+    return _out
+
+
+
