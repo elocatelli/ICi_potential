@@ -34,13 +34,13 @@ screening_constant : the value of the quantity kR
 
 eccentricity : the parameter a (in units of the diameter 2R!)
 
-lmax = 30 : the maximum number of modes in the expansion of the electric potential
+lmax : the maximum number of modes in the expansion of the electric potential
 
-real_size = 3E-7  : the target size of the experimental system one has in mind
+real_size : the target size of the experimental system one has in mind
 
-pathway_distance = 1. : centre-centre distance at which the pathway is computed
+pathway_distance : centre-centre distance at which the pathway is computed
 
-energy_units = False  :  whether some quantities are printed in real energy units (eV) or in units of kB T
+energy_units :  whether some quantities are printed in real energy units (eV) or in units of kB T (boolean)
 
 ## Relevant attributes:
 
