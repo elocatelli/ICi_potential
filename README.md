@@ -10,13 +10,17 @@ To use ICi_potential.py, one should type in the terminal
 python3 ICi_potential.py PATH_TO_FOLDER PATH_TO_PARAMETER_FILE PATH_TO_TOPOLOGY_FILE
 
 where the 3 parameters are all optional, that is, if not given the default values will be used (if valid).
+
 PATH_TO_FOLDER is the path to the folder where the results will be saved (defaults to current folder)
+
 PATH_TO_PARAMETER_FILE is the path to the mandatory file that contains the model parameters (see below - defaults to 'params.dat' in the current folder)
+
 PATH_TO_TOPOLOGY_FILE is the path to the optional file that contains the topology of the ICi particle (truly optional - defaults to the polar topology)
 
 For an example of the parameter file, see "params_template.dat"; for an example of the topology file, see "topology_template.dat".
 
-Description of the parameters (for the physical meaning of some of them, see the paper "Anisotropic DLVO-like interaction for charge patchiness in colloids and proteins" by Gnidovec et al.):
+### Description of the parameters 
+(for the physical meaning of some of them, see the paper "Anisotropic DLVO-like interaction for charge patchiness in colloids and proteins" by Gnidovec et al.):
 nr_patches : number of off-centre charges
 same_patch : the off-centre charges have the same value or not (boolean)
 patch_charge : the value of the off-centre charge (if the two are not equal provide two values, separated by a comma)
