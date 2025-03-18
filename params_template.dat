@@ -1,0 +1,10 @@
+nr_patches = 2
+same_patch = True 
+patch_charge = 280 
+colloid_charge = -560
+screening_constant = 3.
+eccentricity = 0.25
+lmax = 30
+real_size = 3E-7
+pathway_distance = 1.
+energy_units = False
