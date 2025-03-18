@@ -21,15 +21,25 @@ For an example of the parameter file, see "params_template.dat"; for an example 
 
 ### Description of the parameters 
 (for the physical meaning of some of them, see the paper "Anisotropic DLVO-like interaction for charge patchiness in colloids and proteins" by Gnidovec et al.):
+
 nr_patches : number of off-centre charges
+
 same_patch : the off-centre charges have the same value or not (boolean)
+
 patch_charge : the value of the off-centre charge (if the two are not equal provide two values, separated by a comma)
+
 colloid_charge : the value of the central charge
+
 screening_constant : the value of the quantity kR
+
 eccentricity : the parameter a (in units of the diameter 2R!)
+
 lmax = 30 : the maximum number of modes in the expansion of the electric potential
+
 real_size = 3E-7  : the target size of the experimental system one has in mind
+
 pathway_distance = 1. : centre-centre distance at which the pathway is computed
+
 energy_units = False  :  whether some quantities are printed in real energy units (eV) or in units of kB T
 
 ## Relevant attributes:
