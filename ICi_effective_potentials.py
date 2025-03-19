@@ -42,20 +42,15 @@ def calc_dists_angles_2p(part1, part2, r, a, box):
 
 class Mixin:
 
-    def do_effective_potential(self, funcname, funcname_1P, Np=100):
+    def do_effective_potential(self, fname, Np=100):
 
         num=Np
-        self.effective_potential_radial(funcname, funcname_1P, Np=num)
-        np.savetxt(self.ICidict['folder']+"/radial_effective_potential_"+funcname+".dat", self.effective_potential, fmt="%.5e")
+        self.effective_potential_radial(Np=num)
+        np.savetxt(self.ICidict['folder']+"/"+fname, self.effective_potential, fmt="%.5e")
        
-        ##uncomment to plot angular dependence at contact (also usable as standalone attribute)
-        #self.effective_potential_plot_angles(funcname, funcname_1P, [1,0,0], myICi.ICidict['folder']+'/rotation_x_effective_potential.dat', Np=num)
-        #self.effective_potential_plot_angles(funcname, funcname_1P, [0,1,0], myICi.ICidict['folder']+'/rotation_y_effective_potential.dat', Np=num)
-        #self.effective_potential_plot_angles(funcname, funcname_1P, [0,0,1], myICi.ICidict['folder']+'/rotation_z_effective_potential.dat', Np=num)
+        self.logfile_mf() 
 
-        self.logfile_mf(funcname) 
-
-    def effective_potential_radial(self, funcname, funcname_1P, Np=100):
+    def effective_potential_radial(self, Np=100):
 
         self.effective_potential = []
         for r in np.linspace(self.sigma,3.*self.sigma,Np):
@@ -65,15 +60,15 @@ class Mixin:
 
             ##case 1 patch-patch case 2 equator-equator case 3 equator patch
             for _ori in to_orient:              
-                VV = self.effpot_funcdict[funcname](r, 0., [0,1,0], _ori, funcname_1P)
+                VV = self.effpot_funcdict['2patch'](r, 0., [0,1,0], _ori)
                 self.effective_potential.extend([VV[0,2]])
 
         l_to = len(to_orient)+1
         self.effective_potential = np.reshape(np.asarray(self.effective_potential),(int(len(self.effective_potential)/l_to),l_to))
 
-    def effective_potential_plot_angles(self, funcname, funcname_1P, _myaxis, filename, Np=100):
+    def effective_potential_plot_angles(self, _myaxis, filename, Np=100):
 
-        ff=open(filename, "w"); ff.close();
+        ff=open(self.ICidict['folder']+'/'+filename, "w"); ff.close();
         
         to_orient = self.generate_orientations()
         rotaxes = [_myaxis for i in range(len(to_orient))]
@@ -83,14 +78,14 @@ class Mixin:
             r = self.sigma;  ff.write("%.5e " % (th))
             i=0
             for _ori in to_orient:
-                VV = self.effpot_funcdict[funcname](r, th, rotaxes[i], _ori, funcname_1P)   
+                VV = self.effpot_funcdict['2patch'](r, th, rotaxes[i], _ori)   
                 ff.write("%.5e " % (VV[0,2])); i+=1
             ff.write("\n")
 
         ff.close() 
 
 
-    def effective_potential_2patches(self,r, th, rotaxis, topos, funcname):
+    def effective_potential_2patches(self,r, th, rotaxis, topos):
 
         a = self.ecc; Zc = self.colloid_charge; Zp = self.patch_charge; a0 = 0.5*np.sum(a)
         Zoff = np.sum(Zp) + Zc
@@ -125,9 +120,9 @@ class Mixin:
                 dd, thij = calc_dists_angles_2p(_part2, _part1, r, a, self.box)
             
             VV[0,j] = 0
-            VV[0,j] += Zc*hc_c*self.analytic_funcdict[funcname](dd[0], (thij[0]), 0.) 
-            VV[0,j] += Zp[0]*hc_p*self.analytic_funcdict[funcname](dd[1], (thij[1]), 0.) 
-            VV[0,j] += Zp[1]*hc_p*self.analytic_funcdict[funcname](dd[2], (thij[2]), 0.) 
+            VV[0,j] += Zc*hc_c*self.analytic_funcdict['2patch'](dd[0], (thij[0]), 0.) 
+            VV[0,j] += Zp[0]*hc_p*self.analytic_funcdict['2patch'](dd[1], (thij[1]), 0.) 
+            VV[0,j] += Zp[1]*hc_p*self.analytic_funcdict['2patch'](dd[2], (thij[2]), 0.) 
         
         self.topo = np.copy(self.topo_backup)
         ##removed a self.e_charge as prefactor from each term above
@@ -141,9 +136,9 @@ class Mixin:
 
 #######################################################################################################
     
-    def compute_effective_potential(self, _part1, _part2, topos, funcname):
+    def compute_effective_potential(self, _part1, _part2, topos):
 
-        funcname == '2patch'
+        funcname = '2patch'
 
         a = self.ecc; Zc = self.colloid_charge; Zp = self.patch_charge
         Zoff = np.sum(Zp) + Zc
@@ -188,8 +183,9 @@ class Mixin:
 
         return VV
 
-    def logfile_mf(self, funcname):
+    def logfile_mf(self):
 
+        funcname = '2patch'
         PI = np.pi
         outfname = self.ICidict['folder']+"/logfile.dat"
         f = open(outfname,'w')
@@ -205,10 +201,17 @@ class Mixin:
 
         f.write("Zc*LambdaB/radius colloid (non-dim) %.5f\n\n\n" % (-2*self.colloid_charge*self.bjerrum_real/self.real_size) )
         f.write("Zp %s\t" % (" ".join(str(x) for x in self.patch_charge)) )
-        f.write("Patch size (degrees)  %.8f\n" % (self.sp_zero))
+        
+        if self.sp_zero == -1:
+            self.compute_potential_zero()
+        
+        if self.sp_zero < 180:
+            f.write("Patch size (degrees)  %.8f\n" % (self.sp_zero))
+        else:
+            f.write("no root for sp potential, no patch size\n")
 
         if len(self.effective_potential) == 0:
-            self.effective_potential_store('2patch', '2patch', Np=1)
+            self.effective_potential_radial(Np=1)
 
         cfT=self.e_charge/(self.kB*self.temperature)
         if not self.real_units:

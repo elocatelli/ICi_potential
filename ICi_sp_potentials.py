@@ -11,64 +11,53 @@ class Mixin:
     def pot_wrapper(self, th, r, phi, name):
         return self.analytic_funcdict[name](r, th, phi)[0]
 
-    def get_theta0(self, name):
-        return bisect(self.pot_wrapper, 0, 1.83, args=(1,0., name))
-
-    def h_a(self, a, target, name):
-        self.ecc = np.asarray([a,a])
-        return self.get_theta0(name)-target
-
-    def find_theta0(self, name, target):
-        
-        if self.samepatch == False or self.npatch != 2: 
-            print("only polar ICis with equal patches are admissible"); exit(1)
-        _store = self.ecc
-        
-        sol = root_scalar(self.h_a, bracket=[0.005,0.45], method='brentq', args=(target, name))
-        mysol = sol.root
-        np.savetxt(self.ICidict['folder']+'/new_abar.dat', np.asarray([mysol]), fmt='%.8f')
-
-
-    def print_potential_surface(self, name, nth = 50, nph = 100):
+    def store_potential_surface(self, nth = 100):
 
         if self.npatch == 2 and self.default_topo:
              
-            coord = [[ix,iy] for ix in [self.sigma_core] for iy in np.linspace(0,np.pi,nph) ]
-
-            out = []
+            coord = [[ix,iy] for ix in [self.sigma_core] for iy in np.linspace(0,np.pi,nth) ]
          
             for r, th in coord:
-                out0 = self.analytic_funcdict[name](r, th, 0.)
-                out.extend([((th)*180./np.pi), out0[0]])
+                out0 = self.analytic_funcdict['2patch'](r, th, 0.)
+                self.sp_potential.extend([((th)*180./np.pi), out0[0]])
 
-            out = np.reshape((np.asarray(out)),(len(out)//2,2))
-            np.savetxt(self.ICidict['folder']+"/single_particle_potential_outside.dat", out, fmt="%.12e")
-            
-            if nph > 10:
-                g = interp1d(out[:,0], out[:,1], kind='cubic')
-                try:
-                    sol = root_scalar(g, bracket=[0,105.], method='brentq')
-                    self.sp_zero = sol.root
-                except:
-                    print("no root for SP potential")
+            self.sp_potential = np.reshape((np.asarray(self.sp_potential)),(len(self.sp_potential)//2,2))
+                        
         else:
 			
-            print("special solutions not available for this topology"); exit(1)
+            print("not available in this version of the code"); exit(1)
 				
-    
-    def print_potential_radial(self, name):
+    def print_potential_surface(self, fname, Np = 100): 
+
+        self.store_potential_surface(nth = Np)
+        np.savetxt(self.ICidict['folder']+"/"+fname, self.sp_potential, fmt="%.12e")
+
+    def compute_potential_zero(self): 
+
+        if len(self.sp_potential) == 0:
+           self.store_potential_surface(nth = 100)
+        
+        nn = self.sp_potential.shape[0]
+        if nn > 10:
+            g = interp1d(self.sp_potential[:,0], self.sp_potential[:,1], kind='cubic')
+            try:
+                sol = root_scalar(g, bracket=[0,105.], method='brentq')
+                self.sp_zero = sol.root
+            except:
+                self.sp_zero = 1000. 
+
+    def print_potential_radial(self, fname):
         coord = [[ix,iy,iz] for ix in np.linspace(0.5, 1.5, 100) for iy in [0] for iz in [0] ]
             
         out = []
 
         for r, th, ph in coord:
-            out0 = self.analytic_funcdict[name](r, th, 0.)       
+            out0 = self.analytic_funcdict['2patch'](r, th, 0.)       
             out.extend([r, float(out0)])
 
         out = np.reshape(np.asarray(out).astype('float64'),(int(len(out)/2),2))
         
-        np.savetxt(self.ICidict['folder']+"/potential_outside_radial.dat", out, fmt="%.5e")
-
+        np.savetxt(self.ICidict['folder']+"/"+fname, out, fmt="%.12e")
 
 
     def potential_outside_2sympatches(self, r, th, phi):

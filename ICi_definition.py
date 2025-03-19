@@ -77,7 +77,7 @@ class ICi(ICi_particle.Mixin, ICi_orientations.Mixin, ICi_sp_potentials.Mixin, I
         
         #################################
 
-        self.DH_potential = []
+        self.sp_potential = []
         self.effective_potential = []
 
     def set_params(self):

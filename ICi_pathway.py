@@ -25,12 +25,11 @@ class Mixin:
     def pathway_reset(self,fname_mf):
 
         self.thend = 0
-        self.fpath_mf = fname_mf
+        self.fpath_mf = self.ICidict['folder']+'/'+fname_mf
         ff = open(self.fpath_mf, "w"); ff.close() 
 
     def get_pathway_point(self,  instructions, th):
 
-        ipc_type = '2patch'
         start_o = instructions['orientation'];
         shift_v = instructions['shift_vector']; 
         _displ = instructions['pathway_distance']
@@ -48,11 +47,11 @@ class Mixin:
         _part2_0 = self.generate_particle(start_o[1])[:,:3]
         _part2_1 = rotate_patches(_part2_0, rotaxis_p, th_1); _part2_1[:,:3] += _displ*shift_v
         _part2 = rotate_part(_part2_1, rotaxis_c, th_2)
-        VV = self.compute_effective_potential(_part1, _part2, [get_topo(_part1,self.box),get_topo(_part2,self.box)], ipc_type)
+        VV = self.compute_effective_potential(_part1, _part2, [get_topo(_part1,self.box),get_topo(_part2,self.box)])
 
         return VV[0,2]
 
-    def print_ep_pp_sep(self):
+    def print_ep_pp_sep(self, fname):
         
         xx = np.asarray([1,0,0]); yy = np.asarray([0,1,0]); zz = np.asarray([0,0,1])
 
@@ -63,11 +62,11 @@ class Mixin:
         E_PP = self.get_pathway_point(self.build_instructions(PP,xx, yy, 0, -yy, 1), 0.)
         E_SEP = self.get_pathway_point(self.build_instructions(EP,zz, yy, 0, yy, 1), np.pi/4.)
         
-        f = open(self.ICidict['folder']+"/energies_ep_pp_sep.dat", 'w')
+        f = open(self.ICidict['folder']+"/"+fname, 'w')
         f.write("%.8e %.8e %.8e\n" % (E_EP, E_PP, E_SEP))
         f.close()
 
-    def print_pp_janus(self):
+    def print_pp_janus(self, fname):
 
         xx = np.asarray([1,0,0]); yy = np.asarray([0,1,0]); zz = np.asarray([0,0,1])
 
@@ -77,14 +76,13 @@ class Mixin:
         E_PP = self.get_pathway_point(self.build_instructions(EE,zz, yy, 1, yy, 0), 0.)
         E_PP2 = self.get_pathway_point(self.build_instructions(EE2,zz, yy, 1, yy, 0), 0.)
 
-        f = open(self.ICidict['folder']+"/energies_pp_janus.dat", 'w')
+        f = open(self.ICidict['folder']+"/"+fname, 'w')
         f.write("%.8e %.8e\n" % (E_PP, E_PP2))
         f.close()
 
 
     def pathway_block(self, instructions, rth=np.pi/2.):
-
-        ipc_type = '2patch' 
+ 
         start_o = instructions['orientation']; 
         shift_v = instructions['shift_vector']; 
         _displ = instructions['pathway_distance']
@@ -107,7 +105,7 @@ class Mixin:
             _part2_0 = self.generate_particle(start_o[1])[:,:3]
             _part2_1 = rotate_patches(_part2_0, rotaxis_p, th_1); _part2_1[:,:3] += _displ*shift_v
             _part2 = rotate_part(_part2_1, rotaxis_c, th_2)
-            VV = self.compute_effective_potential(_part1, _part2, [get_topo(_part1,self.box),get_topo(_part2,self.box)], ipc_type)
+            VV = self.compute_effective_potential(_part1, _part2, [get_topo(_part1,self.box),get_topo(_part2,self.box)])
             ff.write("%.5e\n" % (VV[0,2]/self.max_eff_pot))
       
         #print("finish", [get_topo(_part1,self.box),get_topo(_part2,self.box)], _part2[0] )

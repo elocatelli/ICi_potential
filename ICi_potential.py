@@ -34,15 +34,15 @@ def main():
 
     sstart = time.time()
   
-    myICi.print_potential_surface('2patch', nph=100)
-    myICi.do_effective_potential('2patch', '2patch', Np=1)
-    myICi.pathway(myICi.ICidict['folder']+'/test_pathway_ipc.dat')
+    myICi.print_potential_surface('single_particle_potential_outside.dat', Np=100)
+    myICi.do_effective_potential('radial_effective_potential.dat', Np=100)
+    myICi.pathway('pathway.dat')
 
-    #myICi.pathway_pp_ep_pp(myICi.ICidict['folder']+'/ipc_pp_ep_pp.dat', myICi.ICidict['folder']+'/test_pathway_cg.dat')
-    #myICi.pathway_ee_ep_ee(myICi.ICidict['folder']+'/ipc_ee_ep_ee.dat', myICi.ICidict['folder']+'/test_pathway_cg.dat')
+    #myICi.pathway_pp_ep_pp('pp_ep_pp.dat' )
+    #myICi.pathway_ee_ep_ee('ee_ep_ee.dat' )
     
-    #myICi.print_ep_pp_sep()
-    #myICi.print_pp_janus()
+    #myICi.print_ep_pp_sep("energies_ep_pp_sep.dat")
+    #myICi.print_pp_janus("energies_pp_janus.dat")
 
     eend = time.time(); print("done, elapsed time ", eend-sstart)
 
