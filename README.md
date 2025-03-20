@@ -11,7 +11,7 @@ python3 ICi_potential.py PATH_TO_FOLDER PATH_TO_PARAMETER_FILE PATH_TO_TOPOLOGY_
 
 where the 3 parameters are all optional, that is, if not given the default values will be used (if valid).
 
-PATH_TO_FOLDER is the path to the folder where the results will be saved (defaults to current folder). Note: this sets one of the attributes of the python class "ICi" (see below). Barring changes to the code, all files produced by the script will be saved in this folder
+PATH_TO_FOLDER is the path to the folder where the results will be saved (defaults to 'ICi_RESULTS'). Note: this sets one of the attributes of the python class "ICi" (see below). Barring changes to the code, all files produced by the script will be saved in this folder
 
 PATH_TO_PARAMETER_FILE is the path to the mandatory file that contains the model parameters (see below - defaults to 'params.dat' in the current folder)
 
@@ -44,11 +44,15 @@ energy_units :  whether some quantities are printed in real energy units (eV) or
 
 ## Relevant attributes:
 
-the code contains a Python class, ICi, with several methods.
+the code contains a Python class, ICi, with several methods and attributes.
 
 To create an instance of the class, simply type 
 
 myICI = ICi()
+
+Aside for the attributes that pertain the model (such as the charges, the eccentricity etc.) important attributes are:
+
+ICidict : a dictionary containing 3 items 'folder', 'toread' and 'topofile', that the code use to store the directory (where the files are saved), the parameter file and the topology file. If you specify the parameter file and/or the topology file, please set the whole path to the file (the absolute path or the path relative to the working directory). 
 
 The most useful methods for the end user are:
 
@@ -68,7 +72,7 @@ logfile_mf(): prints a few important information on the system. This method is c
 
 compute_potential_zero(): estimates where the single particle potential crosses zero, which , as reported in the reference paper, can be identified with the patch size. If the single particle potential has already been computed, the zero is computed as long as the number of stored points is larger than 10 (e.g. when calling the method "print_potential_surface",  Np> 10). The estimated value is stored as the attribute "sp_zero". This method is called by default with "logfile_mf" 
 
-When relevant, 'filename' is a string, that will set the file name where the data will be saved.  
+When relevant, 'filename' is a string, that will set the file name; the full path includes the PATH_TO_FOLDER.  
 
 A few other methods can be found (commented) in the file "ICi_potential.py".
 

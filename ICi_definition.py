@@ -19,9 +19,8 @@ class ICi(ICi_particle.Mixin, ICi_orientations.Mixin, ICi_sp_potentials.Mixin, I
 
     def __init__(self) :
 
-        self.ICidict = {'folder': 'ICi_RESULTS', 'toread': 'params.dat', 'nr_patches' : 2, 'same_patch' : True, 'colloid_charge' : 0., 'patch_charge' :  np.zeros(2), 'sigma' : 1., 'sigma_core' : 0.5, 'patch_sigma' : np.zeros(2), 'screening_constant' : 2., 'debye_constant' : 1., 'kappa' : 0., 'gamma' : np.zeros(2), 'cosgamma' : np.zeros(2), 'delta' : 0., 'eccentricity' : np.zeros(2), 'bjerrum' : 0.7, 'epsilon' : 80., 'real_size' : 200., 'topofile' : 'topology.dat', 'topo' : [], 'lmax' : 30 }
-
-        
+        self.ICidict = {'folder': 'ICi_RESULTS', 'toread': 'params.dat', 'topofile' : 'topology.dat'}
+ 
         self.analytic_funcdict = {'2patch' : self.potential_outside_2sympatches }
 
         self.effpot_funcdict = {'2patch': self.effective_potential_2patches}
