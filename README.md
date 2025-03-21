@@ -3,11 +3,11 @@ Coarse graining potential generator for ICi particles
 
 ## Usage
 
-The code is to be intended as a library of functions; the script "ICi_potential.py" provides an example of how they can be used.
+The code is to be intended as a library of functions; the script "ICi_usage_example.py" provides an example of how they can be used.
 
-To use ICi_potential.py, one should type in the terminal
+To use ICi_usage_example.py, one should type in the terminal
 
-python3 ICi_potential.py PATH_TO_FOLDER PATH_TO_PARAMETER_FILE PATH_TO_TOPOLOGY_FILE
+python3 ICi_usage_example.py PATH_TO_FOLDER PATH_TO_PARAMETER_FILE PATH_TO_TOPOLOGY_FILE
 
 where the 3 parameters are all optional, that is, if not given the default values will be used (if valid).
 
@@ -74,12 +74,12 @@ compute_potential_zero(): estimates where the single particle potential crosses 
 
 When relevant, 'filename' is a string, that will set the file name; the full path includes the PATH_TO_FOLDER.  
 
-A few other methods can be found (commented) in the file "ICi_potential.py".
+A few other methods can be found (commented) in the file "ICi_usage_example.py".
 
 
 ## Brief description of each file:
 
-ICi_potential : example of a script for computing single particle/pair potentials and other quantities
+ICi_usage_example : example of a script for computing single particle/pair potentials and other quantities
 
 ICi_definition : all the attributes are defined here
 
