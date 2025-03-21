@@ -68,9 +68,9 @@ do_effective_potential(filename, Np=100): computes and saves in a text file the 
 
 pathway(filename): computes and saves in text file the pair energy along the rotational pathway (see the paper mentioned above for a description of the pathway); the distance is fixed by the parameter "pathway_distance". The number of sample points is hard coded in the paramter "path_N", that can be found in the file "ICi_definitions.py" 
 
-logfile_mf(): prints a few important information on the system. This method is called by default with "do_effective_potential"
+logfile_mf(): prints a few important information on the system. This method is called by default with "do_effective_potential" and saves the information on a file called "logfile.dat"
 
-compute_potential_zero(): estimates where the single particle potential crosses zero, which , as reported in the reference paper, can be identified with the patch size. If the single particle potential has already been computed, the zero is computed as long as the number of stored points is larger than 10 (e.g. when calling the method "print_potential_surface",  Np> 10). The estimated value is stored as the attribute "sp_zero". This method is called by default with "logfile_mf" 
+compute_potential_zero(): estimates where the single particle potential crosses zero, which , as reported in the reference paper, can be identified with the patch size. If the single particle potential has already been computed, the zero is computed as long as the number of stored points is larger than 10 (e.g. when calling the method "print_potential_surface",  Np> 10). The estimated value is stored as the attribute "sp_zero". This method is called by default with "logfile_mf" and the patch size can be found in "logfile.dat"  
 
 When relevant, 'filename' is a string, that will set the file name; the full path includes the PATH_TO_FOLDER.  
 
